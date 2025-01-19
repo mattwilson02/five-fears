@@ -1,6 +1,7 @@
 use chrono::Local;
 use std::fs::File;
 use std::io::{self, Write};
+use std::path::PathBuf;
 
 pub fn get_daily_fears() -> io::Result<Vec<String>> {
     let mut fears: Vec<String> = Vec::new();
@@ -22,8 +23,14 @@ pub fn get_daily_fears() -> io::Result<Vec<String>> {
 }
 
 pub fn write_fears_to_md(fears: &[String]) -> io::Result<()> {
+    let output_dir = PathBuf::from("fears_output");
+
+    if !output_dir.exists() {
+        std::fs::create_dir(&output_dir)?;
+    }
+
     let date = Local::now().format("%Y-%m-%d").to_string();
-    let filename = format!("fears_output/fears_{}.md", date);
+    let filename = output_dir.join(format!("fears_{}.md", date));
 
     let mut file = File::create(&filename)?;
 
@@ -40,6 +47,6 @@ pub fn write_fears_to_md(fears: &[String]) -> io::Result<()> {
         Local::now().format("%B %d, %Y at %H:%M")
     )?;
 
-    println!("\nFears have been written to {}", filename);
+    println!("\nFears have been written to {}", filename.display());
     Ok(())
 }
